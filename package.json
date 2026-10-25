@@ -1,0 +1,1 @@
+{"name":"ai-turing-machine","private":true,"type":"module","scripts":{"test":"node test.mjs && node test-sharing.mjs"}}
