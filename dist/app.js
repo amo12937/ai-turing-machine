@@ -1,5 +1,5 @@
-import {samples} from './samples.js';
-import {encodeRules,decodeRules,xIntentURL} from './sharing.js';
+import {samples} from './samples.js?v=20261026';
+import {encodeRules,decodeRules,xIntentURL} from './sharing.js?v=20261026';
 import{Machine,defaults,validate,parseCSV,csv}from './engine.js';
 const $=id=>document.getElementById(id);let m=new Machine(),rules=structuredClone(defaults),running=false,timer=null,center=0,following=true;const key='turing-lab-v1';let firstVisit=true,shared=false,loadError='',renderedCenter=null,tapeAnimation=null;
 try{const s=JSON.parse(localStorage.getItem(key));if(s&&Array.isArray(s.rules)&&!validate(s.rules)&&Array.isArray(s.tape)&&Number.isSafeInteger(s.head)&&typeof s.state==='string'){firstVisit=false;rules=s.rules;m.tape=new Map(s.tape);m.head=s.head;m.state=s.state;m.steps=s.steps||0;center=m.head;}}catch{}
