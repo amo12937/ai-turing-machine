@@ -1,3 +1,5 @@
-import assert from 'node:assert/strict';import {encodeRules,decodeRules} from './dist/sharing.js';import {defaults} from './dist/engine.js';
+import assert from 'node:assert/strict';import {encodeRules,decodeRules,xIntentURL} from './dist/sharing.js';import {defaults} from './dist/engine.js';
 for(const rules of [defaults,[['開始','🍀','"','R','a,#&? 日本語'],['a,#&? 日本語','','','L','start']]]){const encoded=encodeRules(rules);assert.match(encoded,/^[A-Za-z0-9_-]+$/);assert.deepEqual(decodeRules(encoded),rules);const url=new URL('https://example.test/#rules='+encoded);assert.deepEqual(decodeRules(new URLSearchParams(url.hash.slice(1)).get('rules')),rules);}
 for(const invalid of ['not-valid!',btoa('{"v":2,"rules":[]}'),btoa('{"v":1,"rules":[[1]]}'),'A'.repeat(200001)])assert.throws(()=>decodeRules(invalid));assert.throws(()=>encodeRules([...defaults,defaults[0]]));console.log('PASS: share URL roundtrip, Unicode, reserved characters, malformed and invalid rules');
+
+const sharedURL="https://amo12937.github.io/ai-turing-machine/#rules="+encodeRules(defaults);const intent=new URL(xIntentURL(sharedURL));assert.equal(intent.origin,"https://x.com");assert.equal(intent.pathname,"/intent/tweet");assert.equal(intent.searchParams.get("url"),sharedURL);assert.ok(intent.searchParams.get("text").includes("Turing Lab"));
