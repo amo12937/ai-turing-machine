@@ -1,5 +1,5 @@
-import {samples} from './samples.js?v=20261026-complex';
-import {encodeRules,decodeRules,xIntentURL} from './sharing.js?v=20261026-complex';
+import {samples} from './samples.js?v=20261027-inputs';
+import {encodeRules,decodeRules,xIntentURL} from './sharing.js?v=20261027-inputs';
 import{Machine,defaults,validate,parseCSV,csv}from './engine.js';
 const $=id=>document.getElementById(id);let m=new Machine(),rules=structuredClone(defaults),running=false,timer=null,center=0,following=true;const key='turing-lab-v1';let firstVisit=true,shared=false,loadError='',renderedCenter=null,tapeAnimation=null;
 try{const s=JSON.parse(localStorage.getItem(key));if(s&&Array.isArray(s.rules)&&!validate(s.rules)&&Array.isArray(s.tape)&&Number.isSafeInteger(s.head)&&typeof s.state==='string'){firstVisit=false;rules=s.rules;m.tape=new Map(s.tape);m.head=s.head;m.state=s.state;m.steps=s.steps||0;center=m.head;}}catch{}
@@ -23,7 +23,24 @@ window.addEventListener('hashchange',()=>{stop();loadError='';shared=false;if(lo
 
 function ruleURL(){const url=new URL(location.href);url.hash='rules='+encodeRules(rules);return url.href;}
 $('shareX').onclick=()=>{try{window.open(xIntentURL(ruleURL()),'_blank','noopener,noreferrer');}catch(e){say(e.message);}};
-for(const sample of samples){const card=document.createElement('div');card.className='sample-card';const button=document.createElement('button');button.textContent=sample.name;let inputField=null;if(sample.buildRules){inputField=document.createElement('input');inputField.type='text';inputField.value=sample.input;inputField.setAttribute('aria-label',sample.inputLabel);inputField.maxLength=128;}button.onclick=()=>{if(running)return;let nextRules;try{nextRules=sample.buildRules?sample.buildRules(inputField.value):structuredClone(sample.rules);}catch(e){$('sampleInfo').textContent=e.message;return;}rules=nextRules;m=new Machine();following=true;center=0;renderedCenter=null;$('shareBox').hidden=true;$('direction').textContent='ヘッド · 移動なし';const url=new URL(location.href);url.hash='';history.replaceState(null,'',url);renderRules();save();update();$('sampleInfo').textContent=sample.buildRules?`入力 ${inputField.value||'空列'} を準備する規則と、計算規則を読み込みました。最初は input_… で入力を書き込み、その後に計算します。`:sample.description;say(`「${sample.name}」を読み込みました。再生またはステップ実行で開始します。`);};const description=document.createElement('p');description.textContent=sample.description;card.append(button);if(inputField)card.append(inputField);card.append(description);$('samples').append(card);}
+for(const sample of samples){
+ const card=document.createElement('form');card.className='sample-card';
+ const heading=document.createElement('h3');heading.textContent=sample.name;card.append(heading);
+ const description=document.createElement('p');description.textContent=sample.description;card.append(description);
+ const fields=(sample.fields||[]).map((field,i)=>{
+  const label=document.createElement('label');label.textContent=field.label;
+  const input=document.createElement('input');input.type='text';input.value=field.value;input.id=`sample-${sample.id}-${i}`;input.maxLength=128;input.autocomplete='off';input.spellcheck=false;input.placeholder=sample.id==='palindrome'?'空欄なら空列を判定':'例：101';label.htmlFor=input.id;
+  card.append(label,input);return input;
+ });
+ const button=document.createElement('button');button.type='submit';button.textContent=sample.buildRules?'この入力で読み込む':'プログラムを読み込む';button.setAttribute('aria-label',sample.name+'を読み込む');card.append(button);
+ card.onsubmit=e=>{
+  e.preventDefault();if(running)return;let nextRules;const input=fields.map(f=>f.value.trim()).join(sample.id==='addition'?'+':'');
+  try{nextRules=sample.buildRules?sample.buildRules(input):structuredClone(sample.rules);}catch(e){$('sampleInfo').textContent=e.message;return;}
+  rules=nextRules;m=new Machine();following=true;center=0;renderedCenter=null;$('shareBox').hidden=true;$('direction').textContent='ヘッド · 移動なし';const url=new URL(location.href);url.hash='';history.replaceState(null,'',url);renderRules();save();update();
+  $('sampleInfo').textContent=sample.buildRules?`入力 ${input||'空列'} を読み込みました。再生すると入力をテープに書き込み、その後に計算します。`:sample.description;
+  say(`「${sample.name}」を読み込みました。再生またはステップ実行で開始します。`);
+ };$('samples').append(card);
+}
 
 window.addEventListener('resize',()=>renderTape());renderRules();update();if(loadError)say(loadError);else if(firstVisit||shared)start();
 
