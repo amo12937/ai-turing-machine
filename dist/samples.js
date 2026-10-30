@@ -1,7 +1,20 @@
 import {defaults} from './engine.js';
 export const samples=[
  {id:'binary',name:'二進数カウンター',description:'空のテープから 0 → 1 → 10 → 11… と加算。停止せずに動き続けます。',rules:defaults},
- {id:'beaver',name:'3状態・3記号のビジービーバー',description:'Brady の2004年の記録保持機。空記号・1・2を使い、92,649,163ステップで停止します。1秒1ステップなら約1,072日。現在の最大値を示す機械ではありません。',rules:[['start','','1','R','B'],['start','1','1','R','halt'],['start','2','2','L','C'],['B','','1','L','C'],['B','1','2','R','B'],['B','2','1','L','B'],['C','','1','L','start'],['C','1','','R','B'],['C','2','2','L','start']]}
+ // Original November 2007 machine, not the later one-extra-step variant.
+ {id:'beaver',name:'3状態・3記号のビジービーバー',description:'Terry・Shawn Ligocki、2007年。空記号・1・2を使い、119,112,334,170,342,540ステップで停止します。1秒1ステップなら約37.7億年。最大値は未証明です。',source:'https://turbotm.de/~heiner/BB/simLig33_b.html',sourceLabel:'出典：2007年の遷移表と実行例',rules:[
+  ['start','','1','R','B'],['start','1','2','L','start'],['start','2','1','L','C'],
+  ['B','','','L','start'],['B','1','2','R','B'],['B','2','1','L','B'],
+  ['C','','1','R','halt'],['C','1','1','R','start'],['C','2','1','R','C']
+ ]},
+ {id:'beaver6',name:'6状態・2記号のビジービーバー',description:'Pavel Kropitz、2022年。参照されたWikipediaと同じ機械です。空記号・1を使い、10↑↑15を超えるステップで停止します。10↑↑15は10を15段積んだ指数タワー。最大値は未証明です。',source:'https://www.sligocki.com/2022/06/21/bb-6-2-t15.html',sourceLabel:'出典：2022年の遷移表と停止の解析',rules:[
+  ['start','','1','R','B'],['start','1','','L','D'],
+  ['B','','1','R','C'],['B','1','','R','F'],
+  ['C','','1','L','C'],['C','1','1','L','start'],
+  ['D','','','L','E'],['D','1','1','R','halt'],
+  ['E','','1','L','F'],['E','1','','R','B'],
+  ['F','','','R','C'],['F','1','','R','E']
+ ]}
 ];
 
 // Input preparation also uses ordinary transition rules, so CSV / shared URLs reproduce it.
